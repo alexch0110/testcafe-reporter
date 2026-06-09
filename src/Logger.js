@@ -8,6 +8,8 @@ const getCurrentDateTime = function (dateSeparator = '/', timeSeparator = ':', d
 };
 
 const warnPrefix = 'WARN --- : ';
+const infoPrefix = 'INFO --- : ';
+
 const log = function (message, isStep, isWarn, isBroken) {
     const ctx = require('testcafe').t.ctx;
     const meta = require('testcafe').t.test.meta;
@@ -38,7 +40,7 @@ class Logger {
     }
 
     static info (message) {
-        log(`INFO --- ${message}`, false);
+        log(`${infoPrefix}${message}`, false);
     }
 
     static preconditions () {
@@ -60,5 +62,7 @@ class Logger {
 
 module.exports = {
     Logger,
-    __reporters
+    __reporters,
+    warnPrefix,
+    infoPrefix
 };

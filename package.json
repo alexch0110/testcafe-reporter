@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-acd-html-reporter",
-  "version": "v2.2.3",
+  "version": "v2.3.0",
   "description": "HTML & Excel TestCafe reporter plugin",
   "repository": "https://github.com/alexch0110/testcafe-reporter",
   "author": {
@@ -18,7 +18,7 @@
     "publish-please": "publish-please",
     "prepublish": "publish-please guard",
     "publish": "publish",
-    "postinstall": "node bin/create-config.js"
+    "postinstall": "node bin/create-config.js && node ./bin/exec"
   },
   "keywords": [
     "testcafe",
@@ -48,7 +48,7 @@
     "normalize-newline": "^1.0.2",
     "publish-please": "^5.4.3",
     "read-file-relative": "^1.2.0",
-    "testcafe": "^1.0.1"
+    "testcafe": "^3.7.4"
   },
   "dependencies": {
     "@babel/runtime": "^7.3.4",

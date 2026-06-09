@@ -1,13 +1,18 @@
 /* Wrapper to allow scrolling and container alignment */
 .chart-wrapper {
-    top: 20vh;
-    left: 52%;
-    width: 47%;
     overflow-x: auto;
-    position: absolute;
     border-left: 0.4vw solid #333;
     border-bottom: 0.4vw solid #333;
-    height: 65vh;
+    height: 70vh;
+    position: relative;
+    align-self: anchor-center;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.chart-wrapper::-webkit-scrollbar {
+    display: none;
 }
 
 /* Flex container for bars */
@@ -17,7 +22,6 @@
     /* Bars grow from bottom */
     justify-content: flex-start;
     height: 100%;
-    width: 150vw;
     /* Expand width for scrolling */
     position: relative;
 }
@@ -81,14 +85,12 @@
 
 /* Y-axis label positioning */
 .y-axis-label {
-    position: absolute;
-    left: 48%;
-    top: 45vh;
-    transform: rotate(-90deg);
-    transform-origin: center;
+    transform: rotate(-180deg);
     font-weight: bold;
     font-size: 1.5vw;
     text-align: center;
+    position: relative;
+    writing-mode: vertical-rl;
 }
 
 /* Bar colors */
@@ -111,4 +113,17 @@
 /* Hover effects */
 .chart-wrapper .bar:hover {
     opacity: 0.9;
+}
+
+.chart-info:empty {
+    display: none;
+}
+
+.chart-info {
+    background: #ababab26;
+    border: 1px solid #abababc2;
+    border-radius: 30px;
+    margin: 0.5em;
+    display: grid;
+    grid-template-columns: auto 1fr;
 }

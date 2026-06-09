@@ -1,0 +1,192 @@
+.stepsContent {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    width: 41vw;
+    height: 20vh;
+    border: 1px solid #d3dbea;
+    border-radius: 8px;
+    justify-self: center;
+    background-color: #10101010;
+    padding: 8px;
+    margin-bottom: 1em;
+    gap: 8px;
+}
+
+.stepsData {
+    overflow-y: auto;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.stepsData::-webkit-scrollbar {
+    display: none;
+}
+
+.stepsContent:nth-child(3) {
+    bottom: 11vh;
+    height: 55vh;
+}
+
+.stepsContent::-webkit-scrollbar {
+    width: 0;
+}
+
+.stepName {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 4px 8px;
+    background: #f5f5f5;
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+
+    transition: background .15s ease;
+
+    justify-content: space-between;
+}
+
+.stepName:hover {
+    background: #ebebeb;
+}
+
+.step.hidden, .subStep.hidden {
+    display: none;
+}
+
+.step[hiddenInfo] .subStep {
+    display: none;
+}
+
+.step .subStep {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin-left: 20px;
+    margin-top: 6px;
+    padding: 6px 10px;
+
+    font-size: 13px;
+    color: #555;
+
+    border-left: 5px solid #e0e0e0;
+    font-family: ui-monospace, monospace;
+    background-color: #ffffff42;
+}
+
+.step {
+    margin-bottom: 8px;
+}
+
+.stepName::before {
+    content: "✓";
+    margin-right: 8px;
+    color: #4caf50;
+}
+
+.stepName.warning::before {
+    content: "⚠";
+    color: #ff9800;
+}
+
+.stepName.failed::before {
+    content: "✗";
+    color: #f44336;
+}
+
+.subStep.warning {
+    background: #fff8e1;
+    border-left: 3px solid #ffb300;
+    color: #8a6000;
+}
+
+.subStep.failed {
+    background: #ffebee;
+    border-left: 3px solid #f44336;
+    color: #8a0000;
+}
+
+.stepName::after {
+    content: "▼";
+    margin-left: auto;
+    font-size: 12px;
+    opacity: .6;
+}
+
+.step[hiddenInfo] .stepName::after {
+    content: "▶";
+}
+
+.stepDuration {
+    opacity: .6;
+    font-size: 11px;
+    color: #777;
+    font-family: ui-monospace, monospace;
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+
+.stepTitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stepsControls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.stepsControl {
+    padding: 3px;
+    background: #f5f5f5;
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+
+    transition: background .15s ease;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#stepsSearch {
+    display: flex;
+    gap: 4px;
+    position: relative;
+}
+
+#searchStepInput {
+    flex-grow: 1;
+    padding: 4px 8px;
+    border: 1px solid #d3dbea;
+    border-radius: 6px;
+    position: absolute;
+    top: 3px;
+    left: 2.4em;
+}
+
+#searchStepInput.hidden {
+    display: none;
+}
+
+.step.retried .stepName::before {
+    content: "⟳";
+    color: #2196f3;
+}
+
+.step.retried {
+    display: none;
+}
+
+.step.retried.visible {
+    display: block;
+}

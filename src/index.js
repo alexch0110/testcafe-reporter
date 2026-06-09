@@ -194,6 +194,8 @@ module.exports = function () {
 
         addStep (meta, message) {
             this.doWithTest(meta, test => {
+                if (test.steps.length && test.steps[0].name === message)
+                    for (const step of test.steps) step.retried = true;
                 test.steps.push(this.reportUtil.jsonNames.baseStepContent(message));
             });
         },
@@ -209,7 +211,7 @@ module.exports = function () {
 
         addStepInfo (meta, message) {
             this.doForSteps(meta, steps => {
-                steps[steps.length - 1].actions.push(message);
+                steps[steps.length - 1].actions.push({ message, time: new Date() });
             });
         },
 
@@ -415,6 +417,28 @@ module.exports = function () {
             }
         },
 
+        markFailedStepAndAction (meta) {
+            this.doForSteps(meta, steps => {
+                let isStepFailed = false;
+
+                for (let i = steps.length - 1; i >= 0 && !isStepFailed; i--) {
+                    const step = steps[i];
+
+                    if (Date.parse(step.time) > meta.failTime) continue;
+                    step.failed = true;
+                    isStepFailed = true;
+
+                    for (let j = step.actions.length - 1; j >= 0; j--) {
+                        const action = step.actions[j];
+
+                        if (Date.parse(action.time) > meta.failTime) continue;
+                        action.failed = true;
+                        return;
+                    }
+                }
+            });
+        },
+
         reportTestStart (name, meta) {
             try {
                 this.testMeta = meta;
@@ -448,6 +472,8 @@ module.exports = function () {
 
                 let result = hasErr ? this.testStatuses.failed : this.testStatuses.passed;
                 const testAgent = testRunInfo?.browsers?.map(b => b.prettyUserAgent)?.join();
+
+                if (errorsCount) this.markFailedStepAndAction(meta);
 
                 if (this.isScreensAsBase64 && screenPath) {
                     try {

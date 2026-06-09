@@ -257,3 +257,13 @@ if (
             .replace(addTestMetaOriginal, addTestMetaNew)
     );
 }
+
+
+const failedStepMarkFile = 'node_modules/testcafe/lib/api/wrap-test-function.js';
+const failedTestReplacement = 'errList.addError(err);';
+const failedTestReplaceWith = `errList.addError(err);
+            testRun.test.meta.failTime = new Date();`;
+const failedTestContent = fs.readFileSync(failedStepMarkFile).toLocaleString();
+
+if (!failedTestContent.includes(failedTestReplaceWith))
+    fs.writeFileSync(failedStepMarkFile, failedTestContent.replace(failedTestReplacement, failedTestReplaceWith));

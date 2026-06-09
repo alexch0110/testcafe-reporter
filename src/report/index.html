@@ -8,6 +8,8 @@
   <link rel="stylesheet" type="text/css" href="css/summary.css">
   <link rel="stylesheet" type="text/css" href="css/chart.css">
   <link rel="stylesheet" type="text/css" href="css/menu.css">
+  <link rel="stylesheet" type="text/css" href="css/error.css">
+  <link rel="stylesheet" type="text/css" href="css/steps.css">
   <script src="js/DocumentController.js"></script>
 </head>
 <body>
@@ -17,14 +19,11 @@
       <span>startTime</span>
     </div>
     <input id="search" type="text" placeholder="Search..." oninput="onSearch(this.value)" />
-    <div id="searchFixture" enabled="true">F</div>
-    <div class="tag">T</div>
-    <img
-      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAB3SURBVDiN3dC7CsJQEIThz+Lgy9lbCHm4FIIRYhF9uhRauMVySI5iI2SrWebfC8OmqsOA0mAKrsEumiPu2P/gN6Gvhmv4EXDBbW14l3SHA07RX5L/xDH0GRP6tctj6OId6pD67Dff/08G9ZKlDOZP1+slOYOt1gtUBB32Td/gNAAAAABJRU5ErkJggg=="
-      id="expandFixtures" />
-    <img id="sort" class="default"
-      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAFASURBVEhL7Za9LgVBHEeXjig8g55K6wEoJVqJQqJTeQbR6EWpppSrEjyCykugECof5+zdkclmdz4KzY1fcrLz3+y9ZyeZ+c82M585OIYnWPdGIivgc0dtVRgFp/Dd8QIp0Q743G1bFaQvCDzDmKhKEgs+4bUbK/A6NqNiSV+wD/7Ieg/uu/HQjIolJxALTJD4J0sQRM5oDUKykvnuugtfcADn3ujlDbbgAZZhE6qzChvT4W/imYQswjYstNU0xTN5BN8yl3e4go+2KkyQ/Gn+JVWplbiqXF2uslxcra7aaskhXMIE3KBjcUPfwY1FreQa3PG+peMhkYIzsFVdeCOVoc1o7F2hadpq7G1hMyqwc1jbC7MZk5hY5My82rXtfcUCk5KYWBRTLDA5iemLqgTGM9uz2zM8FUU+5zfBTKdpfgBJ72kPNgLJbwAAAABJRU5ErkJggg==" />
-      <div id="filter-icon" class="filter-icon" title="Hide tests with stable result by passed runs count">S</div>
+    <div id="searchFixture" enabled="true" class="summaryControl">F</div>
+    <div class="tag summaryControl">T</div>
+    <div id="expandFixtures" class="summaryControl">≫</div>
+    <div id="sort" class="default summaryControl">⇅</div>
+      <div id="filter-icon" class="filter-icon summaryControl" title="Hide tests with stable result by passed runs count">S</div>
       <input type="number" id="run-count" min="2" max="9" value="3" title="Minimum test runs with the same status" />  
       <div class="radios">
       <fieldset id="infoType">
@@ -77,16 +76,32 @@
       <input type="checkbox" id="showShortInfo">
     </label>
   </div>
-  <div class="tests-tree"></div>
-  <div class="test-info">
-    <span class="info-icon"></span>
-    <div id="run-info"></div>
-    <div id="screenshot"></div>
+  <div class="content">
+    <div class="tests-tree"></div>
+    <div class="test-info">
+      <span class="info-icon"></span>
+      <div id="run-info"></div>
+      <div class="stepsContent">
+        <div class="stepsControls">
+            <div id="expandSteps" class="stepsControl" title="Expand all steps">≫</div>
+            <div id="stepsSearch">
+              <div class="stepsControl" id="searchStep" title="Search steps">🔍</div>
+              <input id="searchStepInput" type="text" placeholder="Search steps..." class="hidden"/>
+            </div>
+            <div id="clearSearch" class="stepsControl" title="Clear search">✕</div>
+            <div id="displayRetries" class="stepsControl" title="Display steps from previous tests retries">⟳</div>
+        </div>
+      </div>
+      <div id="screenshot"></div>
+    </div>
+    <div class="chart-info">
+    </div>
   </div>
   <div class="context-menu">
     <div class="context-menu-item" id="copy-name">Copy Name</div>
     <div class="context-menu-item" id="copy-full">Copy Full</div>
-    <div class="context-menu-item" id="show-context">Show in context</div>
+    <div class="context-menu-item" id="copy-screen">Copy Screenshot</div>
+    <div class="context-menu-item" id="show-context">Show in Context</div>
    </div>
 </body>
 

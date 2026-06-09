@@ -4,6 +4,7 @@
     align-items: center;
     margin: 1vh 0;
     padding-left: 1vw;
+    flex: 0 0 auto;
 }
 
 #time {
@@ -42,8 +43,8 @@
     color: maroon;
 }
 
-.summary .tag, .summary #searchFixture, .summary #expandFixtures, .summary img#sort, .summary #filter-icon {
-    background-color: #3e78ff;
+.summaryControl {
+    background-color: #3e78ff73;
     color: #333;
     margin-left: 1vw;
     padding: 0.5em;
@@ -53,6 +54,10 @@
     width: 0.8vw;
     height: 1em;
     text-align: center;
+}
+
+.summaryControl:hover {
+    background-color: #3e78ff9c;
 }
 
 /* Numeric Input Styling */
@@ -159,7 +164,7 @@
     transition: transform 0.3s ease;
 }
 
-#sort[class="name"] {
+#sort:not([class*="default"]) {
 	transform: rotate(90deg);
 }
 

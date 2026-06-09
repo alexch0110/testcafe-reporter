@@ -15,6 +15,7 @@
     window.QUERY_TEST_INFO = '.test-info';
     window.QUERY_TEST = '.test';
     window.QUERY_FIXTURE_NAME = '.fixtureName';
+    window.QUERY_CHART_INFO = '.chart-info';
 
     // Steps data storage
     const stepsData = [];
@@ -23,14 +24,23 @@
     const getFixturesContainer = () => document.querySelector('.fixtures');
     const getSearchInput = () => document.querySelector('#search');
     const getSearchFixtureButton = () => document.querySelector('#searchFixture');
-    const getSortButton = () => document.querySelector('img#sort');
+    const getSortButton = () => document.querySelector('#sort');
     const getTagButton = () => document.querySelector('.summary .tag');
     const getExpandCollapseButton = () => document.querySelector('#expandFixtures');
     const getShowChartRadio = () => document.querySelector('#singleChart');
     const getFilterIcon = () => document.getElementById('filter-icon');
     const getRunCountInput = () => document.getElementById('run-count');
     const getContextMenu = () => document.querySelector('.context-menu');
-    
+    const getSearchStepInput = () => document.querySelector('#searchStepInput');
+    const getSearchStepButton = () => document.querySelector('#searchStep');
+    const getExpandCollapseStepsButton = () => document.querySelector('#expandSteps');
+    const getSearchClearButton = () => document.querySelector('#clearSearch');
+    const getShowRetryStepsButton = () => document.querySelector('#displayRetries');
+    const getCopyNameMenuItem = () => document.getElementById('copy-name');
+    const getCopyFullMenuItem = () => document.getElementById('copy-full');
+    const getCopyScreenMenuItem = () => document.getElementById('copy-screen');
+    const getShowContextMenuItem = () => document.getElementById('show-context');
+
     // Tooltip element
     let tooltip;
 
@@ -81,15 +91,20 @@
 
                     if (stackTraceElement.getAttribute('traceId') === id) {
                         try {
-                            const textContent = stackTraceElement.textContent
-                                .replace(/\n/g, '')
-                                .replace(/\\/g, '\\\\')
-                                .replace(/="(.*?)"/g, '=\\"$1\\"');
-
-                            return JSON.parse(textContent);
+                            return JSON.parse(stackTraceElement.textContent);
                         }
-                        catch (e) {
-                            console.error(`Error parsing stack trace for ID ${id}:`, e);
+                        catch {
+                            try {
+                                const textContent = stackTraceElement.textContent
+                                    .replace(/\n/g, '')
+                                    .replace(/\\/g, '\\\\')
+                                    .replace(/="(.*?)"/g, '=\\"$1\\"');
+
+                                return JSON.parse(textContent);
+                            }
+                            catch (e) {
+                                console.error(`Error parsing stack trace for ID ${id}:`, e);
+                            }
                         }
                     }
                     return [];
@@ -115,21 +130,41 @@
     // Capitalize a string
     const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
+    const getStatusIcon = (status) => {
+        switch (status) {
+        case 'passed': return '✓';
+        case 'failed': return '✗';
+        case 'broken': return '⚠';
+        case 'skipped': return '⊘';
+        default: return '';
+        }
+    };
+
     // Append summary elements to a container
-    const appendSummaryElements = (statuses, container, includeName, id) => {
+    const appendSummaryElements = (statuses, container, isHead, id) => {
         STATUS_CLASSES.forEach((statusName) => {
             const count = statuses[statusName] || 0;
 
             if (count > 0) {
                 const statusElement = document.createElement('div');
+                const style = document.createElement('style');
 
                 statusElement.classList.add(statusName);
-                if (includeName) statusElement.textContent = `${capitalize(statusName)}: ${count}`;
+                statusElement.setAttribute('title', `Filter ${capitalize(statusName)} tests`);
+                
+                document.head.appendChild(style);
+
+                if (isHead) {
+                    statusElement.textContent = `${count}`;
+
+                    style.sheet.insertRule(`
+                        .statuses .${statusName}::before {
+                            content: '${getStatusIcon(statusName)}';
+                        }
+                    `, style.sheet.cssRules.length);
+                }
                 else {
                     container.id = id.toString();
-                    const style = document.createElement('style');
-
-                    document.head.appendChild(style);
             
                     // Add a CSS rule for the ::after pseudo-element dynamically
                     style.sheet.insertRule(`
@@ -182,6 +217,12 @@
         getExpandCollapseButton().addEventListener('mouseenter', showExpandCollapseTooltip);
         getExpandCollapseButton().addEventListener('mouseleave', removeTooltip);
 
+        getExpandCollapseStepsButton().addEventListener('click', onExpandCollapseStepsClick);
+        getSearchStepInput().addEventListener('input', debounce(searchInputOnInput, 300));
+        getSearchStepButton().addEventListener('click', searchStepsOnClick);
+        getSearchClearButton().addEventListener('click', onSearchClearClick);
+        getShowRetryStepsButton().addEventListener('click', onShowRetryStepsClick);
+
         document.querySelectorAll('[name=showInfo]').forEach((radio) => {
             radio.addEventListener('change', onShowInfoSwitch);
         });
@@ -223,11 +264,65 @@
             
         });
 
-        document.querySelector(QUERY_TEST_INFO)?.addEventListener('contextmenu', function (event) {
-            if (!event.target.closest('.error')) return;
-            event.preventDefault();
+        document.querySelector('body')?.addEventListener('contextmenu', function (event) {
             const contextMenu = getContextMenu();
 
+            let srcValue = '';
+
+            let id = '';
+
+            let copyValue = '';
+
+            if (event.target.closest('.error')) {
+                srcValue = 'error';
+
+                getCopyFullMenuItem()?.classList.remove('hidden');
+                getCopyScreenMenuItem()?.classList.add('hidden');
+                getShowContextMenuItem()?.classList.remove('hidden');
+            }
+            else if (event.target.closest('.fixtureName')) {
+                srcValue = 'fixture';
+                copyValue = event.target.closest('.fixtureName').innerText;
+
+                getCopyFullMenuItem()?.classList.add('hidden');
+                getCopyScreenMenuItem()?.classList.add('hidden');
+                getShowContextMenuItem()?.classList.add('hidden');
+            }
+            else if (event.target.closest('.test')) {
+                srcValue = 'test';
+                id = event.target.closest('.test').id;
+
+                getCopyFullMenuItem()?.classList.remove('hidden');
+                getCopyScreenMenuItem()?.classList.remove('hidden');
+                getShowContextMenuItem()?.classList.add('hidden');
+            }
+            else if (event.target.closest('.stepName')) {
+                srcValue = 'stepName';
+                copyValue = event.target.closest('.stepName').querySelector('.stepTitle')?.textContent;
+
+                getCopyFullMenuItem()?.classList.add('hidden');
+                getCopyScreenMenuItem()?.classList.add('hidden');
+                getShowContextMenuItem()?.classList.add('hidden');
+            }
+            else if (event.target.closest('.subStep')) {
+                srcValue = 'subStep';
+                copyValue = event.target.closest('.subStep').textContent;
+
+                getCopyFullMenuItem()?.classList.add('hidden');
+                getCopyScreenMenuItem()?.classList.add('hidden');
+                getShowContextMenuItem()?.classList.add('hidden');
+            }
+            else {
+                contextMenu.style.display = 'none';
+                return;
+            }
+
+            event.preventDefault();
+
+            contextMenu.setAttribute('src', srcValue);
+            contextMenu.setAttribute('srcId', id);
+            contextMenu.setAttribute('copyValue', copyValue);
+            
             contextMenu.style.top = `${event.clientY}px`;
             contextMenu.style.left = `${event.clientX}px`;
             contextMenu.style.display = 'block';
@@ -238,27 +333,52 @@
             getContextMenu().style.display = 'none';
         });
 
-        document.getElementById('copy-name').addEventListener('click', function () {
-            const nameText = document.querySelector('.error-name').textContent.trim();
+        getCopyNameMenuItem().addEventListener('click', function () {
+            const src = getContextMenu().getAttribute('src');
+            
+            let resultText = '';
 
-            navigator.clipboard.writeText(nameText);
+            if (src === 'error') resultText = document.querySelector('.error-name').textContent.trim();
+            else if (src === 'test') {
+                const testId = getContextMenu().getAttribute('srcId');
+                
+                resultText = document.querySelector(`${QUERY_TEST}[id='${testId}']`).innerText;
+            }
+            else resultText = getContextMenu().getAttribute('copyValue');
+
+            navigator.clipboard.writeText(resultText);
         });
     
         // Copy Full Error content to clipboard with newlines between tags
-        document.getElementById('copy-full').addEventListener('click', function () {
-            let errorText = '';
+        getCopyFullMenuItem().addEventListener('click', function () {
+            let resultText = '';
 
-            document.querySelector('.error').childNodes.forEach((child) => {
-                if (child.nodeType === Node.ELEMENT_NODE) 
-                    errorText += child.textContent.trim() + '\n';
-                
-            });
-            navigator.clipboard.writeText(errorText.trim());
+            if (getContextMenu().getAttribute('src') === 'error') {
+                document.querySelector('.error').childNodes.forEach((child) => {
+                    if (child.nodeType === Node.ELEMENT_NODE) 
+                        errorText += child.textContent.trim() + '\n';
+                });
+            }
+            else {
+                const testId = getContextMenu().getAttribute('srcId');
+                const test = document.querySelector(`${QUERY_TEST}[id='${testId}']`);
+                const fixtureName = test.closest(QUERY_FIXTURE).querySelector(QUERY_FIXTURE_NAME).textContent;
+                const testName = test.innerText;
+
+                resultText = `${fixtureName} - ${testName}`;
+            }
+            navigator.clipboard.writeText(resultText.trim());
         });
     
         // Show error in context (modal)
-        document.getElementById('show-context').addEventListener('click', function () {
+        getShowContextMenuItem().addEventListener('click', function () {
             showDialog(document.querySelector('.error'));
+        });
+
+        getCopyScreenMenuItem().addEventListener('click', function () {
+            const screen = stepsData.find((d) => d.id === getContextMenu().getAttribute('srcId')).screenshot();
+
+            navigator.clipboard.writeText(screen);
         });
 
         document.querySelector('body')?.addEventListener('wheel', (event) => {
@@ -578,9 +698,9 @@
 
     // Toggle expand/collapse of all fixtures
     const toggleExpandCollapseFixtures = () => {
-        const isExpanded = getExpandCollapseButton().style.transform === 'rotate(180deg)';
+        const isExpanded = getExpandCollapseButton().style.transform === 'rotate(90deg)';
 
-        getExpandCollapseButton().style.transform = isExpanded ? '' : 'rotate(180deg)';
+        getExpandCollapseButton().style.transform = isExpanded ? '' : 'rotate(90deg)';
 
         document.querySelectorAll(`${QUERY_FIXTURE}:not(.${CLASS_HIDDEN}) ${QUERY_FIXTURE_NAME}`).forEach((fixtureName) => {
             const fixture = fixtureName.parentElement;
@@ -662,18 +782,18 @@
 
         if (indexToShow) selectedRunData = stepsData.filter((run) => run.t === selectedRunData.t && run.f === selectedRunData.f)[indexToShow - 1];
 
-        if (!isSelected || forceShow) addTestRuns(testElement);
-
-        addTestInfo(selectedRunData);
-
         if (selectedRunData.status !== 'skipped') {
-            const stepsContent = document.createElement('div');
+            const stepsContent = document.querySelector('.stepsContent');
+            const stepsDataElement = document.createElement('div');
 
-            stepsContent.classList.add('stepsContent');
-            stepsContent.innerHTML = selectedRunData.steps();
-            document.querySelector(QUERY_TEST_INFO).appendChild(stepsContent);
+            stepsDataElement.classList.add('stepsData');
+            stepsDataElement.innerHTML = selectedRunData.steps();
+            stepsContent.appendChild(stepsDataElement);
+
             document.querySelector(QUERY_TEST_INFO).classList.add(CLASS_SELECTED);
         }
+        addTestInfo(selectedRunData);
+        if (!isSelected || forceShow) addTestRuns(testElement);
     };
 
     // Get the selected run index from a test element
@@ -715,7 +835,7 @@
                 const overtimePercent = Math.min(Math.floor(100 * (runData.runtime - minTime) / minTime), 100);
                 const red = Math.floor(2.55 * overtimePercent);
 
-                runButton.style.backgroundColor = `rgb(${red}, ${255 - red}, 0)`;
+                runButton.style.backgroundColor = `rgb(${red}, ${255 - red}, 0, 0.4)`;
             }
 
             if (isBoth) {
@@ -744,13 +864,11 @@
             runButton.addEventListener('mouseleave', removeTooltip);
 
             runsBlock.appendChild(runButton);
-        });
-
-        const targetContainer = notClickable ? document.querySelector('.tests-tree') : document.querySelector(QUERY_TEST_INFO);
-
-        targetContainer.appendChild(runsBlock);
+        }); 
 
         if (notClickable) {
+            document.querySelector('.tests-tree').appendChild(runsBlock);
+
             const testRect = testElement.getBoundingClientRect();
             const fixturesRight = getFixturesContainer().getBoundingClientRect().right;
 
@@ -760,6 +878,7 @@
             runsBlock.style.width = '47vw';
             runsBlock.style.height = `${testRect.height}px`;
         }
+        else insertInTestInfoStart(runsBlock);
     };
 
     // Add runs for all tests in a fixture
@@ -790,7 +909,7 @@
         testInfoContainer.classList.remove(CLASS_SELECTED);
         this.document
             .querySelectorAll(
-                'div.stepsContent, #screenshot img, #run-info *, #error-info *, table, .y-axis-label, .chart-wrapper'
+                'div.stepsData, #screenshot img, #run-info *, #error-info, table, .y-axis-label, .chart-wrapper'
             )
             .forEach((el) => {
                 el.remove();
@@ -799,6 +918,11 @@
         document.querySelector('#screenshot').innerHTML = '';
         document.querySelector('#run-info').innerHTML = '';
         if (!theSameRuns) document.querySelectorAll('.runs').forEach((el) => el.remove());
+
+        const searchInput = getSearchStepInput();
+
+        searchInput.value = '';
+        searchInput.classList.add('hidden');
     };
 
     // Show test information
@@ -822,17 +946,14 @@
 
         if (stackTrace.length > 0) 
             addStackTrace(stackTrace);
-        
 
         // Add run info
         addRunInfo(testData);
         
         const runIcon = document.querySelector('.info-icon');
         const content = Array.from(document.querySelector('#run-info').children).map(child => child.textContent);
-
          
         runIcon?.addEventListener('mouseenter', event => showTooltip(content.join('\n'), event));
-         
         runIcon?.addEventListener('mouseleave', removeTooltip);
 
         testInfoContainer.classList.add(CLASS_SELECTED);
@@ -867,7 +988,11 @@
         });
 
         if (parent) parent.appendChild(errorInfo);
-        else document.querySelector(QUERY_TEST_INFO).insertBefore(errorInfo, document.querySelector(QUERY_TEST_INFO).firstChild);
+        else insertInTestInfoStart(errorInfo);
+    };
+
+    const insertInTestInfoStart = (element) => {
+        document.querySelector(QUERY_TEST_INFO).insertBefore(element, document.querySelector(QUERY_TEST_INFO).firstChild);
     };
 
     // Add run info to test info
@@ -920,33 +1045,13 @@
 
         if (!errorBlock) return;
 
-        const isExpanded = errorBlock.classList.toggle('error-expanded');
-
-        adjustBodyHeightForError(errorBlock, isExpanded);
-    };
-
-    // Adjust body height when error block is expanded
-    const adjustBodyHeightForError = (errorBlock, isExpanded) => {
-        const body = document.body;
-        const errorHeightChange = errorBlock.getBoundingClientRect().height;
-
-        if (isExpanded) 
-            body.style.height = `${body.getBoundingClientRect().height + errorHeightChange}px`;
-        else 
-            body.style.height = '';
-        
+        errorBlock.classList.toggle('error-expanded');
     };
 
     // Step click handler
     const stepOnClick = (stepNameElement) => {
-        const stepBlock = stepNameElement.closest('.step');
-        const isHidden = stepBlock.hasAttribute('hiddenInfo');
-
-        if (isHidden) 
-            stepBlock.removeAttribute('hiddenInfo');
-        else 
-            stepBlock.setAttribute('hiddenInfo', '');
-        
+        if (stepNameElement.classList.contains('subStep')) return;
+        stepNameElement.closest('.step').toggleAttribute('hiddenInfo');
     };
 
     // Handle show info switch (placeholder function, implementation needed)
@@ -1038,7 +1143,7 @@
 
     // Create chart base elements
     const createChartBases = () => {
-        const infoContainer = document.querySelector(QUERY_TEST_INFO);
+        const infoContainer = document.querySelector(QUERY_CHART_INFO);
     
         const yAxis = document.createElement('div');
     
@@ -1123,6 +1228,70 @@
             }
         });
         document.querySelectorAll(QUERY_FIXTURE).forEach(f => checkAndHideFixture(f));
+    };
+
+    const onExpandCollapseStepsClick = () => {
+        const expandCollapseButton = getExpandCollapseStepsButton();
+
+        expandCollapseButton.style.transform = expandCollapseButton.style.transform === 'rotate(90deg)' ? '' : 'rotate(90deg)';
+        
+        if (expandCollapseButton.style.transform === 'rotate(90deg)') {
+            expandCollapseButton.setAttribute('title', 'Collapse all steps');
+            expandAllSteps();
+        }
+        else {
+            expandCollapseButton.setAttribute('title', 'Expand all steps');
+            collapseAllSteps();
+        }
+    };
+
+    const expandAllSteps = () => {
+        document.querySelectorAll('.test-info .step[hiddenInfo]').forEach(step => step.removeAttribute('hiddenInfo'));
+    };
+
+    const collapseAllSteps = () => {
+        document.querySelectorAll('.test-info .step:not([hiddenInfo])').forEach(step => step.setAttribute('hiddenInfo', ''));
+    };
+
+    const searchStepsOnClick = () => {
+        const searchInput = getSearchStepInput();
+
+        searchInput.classList.toggle('hidden');
+        if (!searchInput.classList.contains('hidden')) searchInput.focus();
+    };
+
+    const searchInputOnInput = () => {
+        const searchValue = getSearchStepInput().value.trim().toLowerCase();
+
+        if (searchValue !== '') expandAllSteps();
+        else collapseAllSteps();
+        
+        document.querySelectorAll('.test-info .step').forEach(step => {
+            const stepName = step.querySelector('.stepTitle').textContent.trim().toLowerCase();
+            const stepMatches = stepName.includes(searchValue);
+            const subSteps = step.querySelectorAll('.subStep');
+
+            for (const subStep of subSteps) {
+                if (subStep.textContent.trim().toLowerCase().includes(searchValue)) subStep.classList.remove('hidden');
+                else subStep.classList.add('hidden');
+            }
+            
+            const hasVisibleSubSteps = step.querySelectorAll('.subStep:not(.hidden)').length > 0;
+
+            if (hasVisibleSubSteps) step.classList.remove('hidden');
+            else if (!stepMatches) step.classList.add('hidden');
+            else step.classList.remove('hidden');
+        });
+    };
+
+    const onSearchClearClick = () => {
+        getSearchStepInput().value = '';
+        searchInputOnInput();
+    };
+
+    const onShowRetryStepsClick = () => {
+        document.querySelectorAll('.test-info .step').forEach(step => 
+            step.classList.toggle('visible'));
     };
 
     window.onFixtureClick = onFixtureClick;

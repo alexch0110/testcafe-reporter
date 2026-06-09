@@ -4,25 +4,34 @@ html {
 }
 
 body {
+    display: flex;
+    height: 100vh;
+    padding: 0;
     margin: 0;
-    background-color: #dbcfc3;
+    background: #f5f6f8;
     font-family: Arial, sans-serif;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 50% 50%;
 }
 
 /* Layout adjustments */
 .tests-tree {
-    width: 51%;
-padding: 0 1em;
-box-sizing: border-box;
+    padding: 0 0.5em;
+    box-sizing: border-box;
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    min-height: 0;
 }
 
 .fixtures {
     overflow-y: auto;
-    max-height: 80vh;
     flex-grow: 1;
 }
 
@@ -35,7 +44,7 @@ box-sizing: border-box;
     padding: 0.5em;
     background-color: #e0e0e0; /* Light background */
     border-radius: 0.5em;
-    margin-bottom: 0.5em;
+    margin-bottom: 12px;
 }
 
 /* Ensure .test elements stack below .fixtureName when .fixture is selected */
@@ -46,7 +55,7 @@ box-sizing: border-box;
 
 /* Styling for .fixtureName */
 .fixtureName {
-    background: linear-gradient(to right, #8884d8, #6b62cc);
+    background: #9187dfdb;
     padding: 0.25em 1em;
     border-radius: 0.5em;
     font-weight: bold;
@@ -66,10 +75,11 @@ box-sizing: border-box;
 
 .selected .fixtureName::before {
     opacity: 1;
+    transform: rotate(90deg);
 }
 
 .fixture.selected .fixtureName {
-    width: 100%; /* Ensure .fixtureName fills full width in selected mode */
+    width: stretch;
 }
 
 /* .summary placed on the right side */
@@ -82,9 +92,9 @@ box-sizing: border-box;
 
 /* Styling the summary badges */
 .fixture .summary div {
-    margin-left: 0.5em;
+    margin-left: 10px;
     padding: 0.2em 0.5em;
-    border-radius: 4px;
+    border-radius: 6px;
     font-weight: bold;
     color: #333;
 }
@@ -120,6 +130,8 @@ box-sizing: border-box;
     white-space: pre-line;
     transition: background 0.3s;
     position: relative;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
 }
 
 /* .test styling */
@@ -135,34 +147,32 @@ box-sizing: border-box;
 
 /* Status-based colors for .test elements */
 .fixture.selected .test[status="passed"] {
-    background-color: #a8e6a1;
+    border-left: 10px solid #4caf50;
 }
 
 .fixture.selected .test[status="failed"] {
-    background-color: #f6a1a1;
+    border-left: 10px solid #f44336;
 }
 
 .fixture.selected .test[status="broken"] {
-    background-color: #f3e99f;
+    border-left: 10px solid #ffeb00;
 }
 
 .fixture.selected .test[status="skipped"] {
-    background-color: #cccccc;
+    border-left: 10px solid #cccccc;
 }
 
 /* Hover effects */
 .fixtureName:hover,
 .test:hover {
-    background: linear-gradient(#bbb, #888);
-    color: #fff;
+    background: #c9c9c9;
     cursor: pointer;
     transition: background 0.3s ease, color 0.3s ease;
 }
 
 .test.selected {
-    border: 2px ridge slateblue;
     font-size: 1.1em;
-    padding-top: 0.5em;
+    box-shadow: 0 0 0 2px #4f7cff;
 }
 
 /* Tag Icon Styles */

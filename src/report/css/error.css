@@ -1,0 +1,155 @@
+#error-info {
+    width: 35vw;
+}
+
+#error-info:empty {
+    position: absolute;
+    top: 0;
+}
+
+.stack-line {
+    display: none;
+}
+
+.error-expanded .stack-line {
+    display: block;
+}
+
+#error-info:hover {
+    cursor: pointer;
+}
+
+#error-info a:hover {
+    cursor: alias;
+}
+
+.error {
+    position: relative;
+    height: fit-content;
+    padding: 1vh 1vw;
+    margin-bottom: 15px;
+    background-color: #d11f1f63;
+}
+
+.error:only-child {
+    top: 10px;
+}
+
+.error.error-expanded {
+    background-color: #d11f1f7a;
+}
+
+.error.error-expanded, .error.error-expanded div {
+    z-index: 101;
+    position: relative;
+}
+
+.error:hover {
+    opacity: 0.7;
+}
+
+.error-name {
+    text-align: center;
+    width: inherit;
+    height: 100%;
+    font-size: 1.4vh;
+    max-height: 7vh;
+    overflow: auto;
+}
+
+.error-expanded .stack-line:nth-of-type(1) {
+    padding-left: 0.5vw;
+}
+.error-expanded .stack-line:nth-of-type(2) {
+    padding-left: 1vw;
+}
+.error-expanded .stack-line:nth-of-type(3) {
+    padding-left: 1.5vw;
+}
+.error-expanded .stack-line:nth-of-type(4) {
+    padding-left: 2vw;
+}
+.error-expanded .stack-line:nth-of-type(5) {
+    padding-left: 2.5vw;
+}
+.error-expanded .stack-line:nth-of-type(6) {
+    padding-left: 3vw;
+}
+.error-expanded .stack-line:nth-of-type(7) {
+    padding-left: 3.5vw;
+}
+.error-expanded .stack-line:nth-of-type(8) {
+    padding-left: 4vw;
+}
+.error-expanded .stack-line:nth-of-type(9) {
+    padding-left: 4.5vw;
+}
+.error-expanded .stack-line:nth-of-type(10) {
+    padding-left: 5vw;
+}
+.error-expanded .stack-line:nth-of-type(11) {
+    padding-left: 5.5vw;
+}
+.error-expanded .stack-line:nth-of-type(12) {
+    padding-left: 6vw;
+}
+.error-expanded .stack-line:nth-of-type(13) {
+    padding-left: 6.5vw;
+}
+.error-expanded .stack-line:nth-of-type(14) {
+    padding-left: 7vw;
+}
+.error-expanded .stack-line:nth-of-type(15) {
+    padding-left: 7.5vw;
+}
+
+.image-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    cursor: zoom-out;
+}
+
+.image-overlay img {
+    max-width: 90%;
+    max-height: 90%;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    border: 2px solid white;
+}
+
+.info-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.info-overlay #error-info {
+    position: unset;
+    top: 7vh;
+    margin: 0;
+    width: auto;
+}
+
+.info-overlay .error:only-child {
+    top: 0;
+}
+
+.info-overlay .error {
+    height: auto;
+    font-size: min(3vh, 3vw);
+}
+
+.info-overlay .error-name {
+    font-size: inherit;
+}

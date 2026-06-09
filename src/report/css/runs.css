@@ -1,13 +1,14 @@
 .runs {
-  position: absolute;
-  left: 10vw;
-  width: 30vw;
-  overflow: auto;
-  height: max(1vw, 2vh);
-  top: 5vh;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
+    margin: 1em 5px;
+    justify-self: center;
+    left: 10vw;
+    width: 35vw;
+    overflow: auto;
+    height: max(1vw, 2vh);
+    top: 5vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
 }
 
 .runs button {

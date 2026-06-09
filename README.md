@@ -4,9 +4,7 @@
 
 ## About
 
-### Important!
-
-#### 2.0.11+ versions works correctly only after execution "npx acd-html-reporter"
+#### 2.0.11-2.2.3 versions works correctly only after execution "npx acd-html-reporter" (fixed in 2.3.0)
 
 This is the **acd-html-reporter** reporter plugin for [TestCafe](http://devexpress.github.io/testcafe).
 
@@ -20,6 +18,14 @@ This is the **acd-html-reporter** reporter plugin for [TestCafe](http://devexpre
 </p>
 
 ## About
+
+### New in 2.3.0:
+
+#### Added better steps view and steps controls.
+
+#### Added context menu for fixtures, tests and steps
+
+#### Styles improvements
 
 ### New in 2.2.1:
 

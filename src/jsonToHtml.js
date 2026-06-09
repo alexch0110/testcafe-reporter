@@ -19,7 +19,7 @@ module.exports = {
         },
 
         baseStepContent: (name) => {
-            return { name: name, actions: [] };
+            return { name: name, actions: [], time: new Date() };
         },
 
         startTime: 'startTime',
@@ -310,17 +310,56 @@ module.exports = {
             //open main steps tag
             let stepsString = `<div fixtureId="${this.id}" status="${this.status}" screenshot="${this.screenshot}" durationMs="${this.durationMs}" userAgent="${this.userAgent}" time="${this.time}" f="${this.fixture.replace(/([\t\n\f />"'=]+)/, '')}" t="${this.test.replace(/([\t\n\f />"'=]+)/, '')}">`;
     
-            test.steps.forEach(step => {
+            test.steps.forEach((step, i, arr) => {
                 //open step tag
-                stepsString += '<div class="step" hiddeninfo>';
-                //stepName content 
-                if (step.name)
-                    stepsString += `<div class="stepName">${getContentAsString(step.name)}</div>`;
+                stepsString += `<div class="step ${step.retried ? 'retried' : ''}" hiddeninfo>`;
 
-                step.actions.forEach(action => {
+                let actionsHtml = '';
+
+                let hasWarns = false;
+
+                step.actions.forEach(actionObj => {
+                    const action = actionObj.message;
+                    const isWarn = action.startsWith('WARN');
+                    const logger = require('./Logger');
+                    const warnPrefix = logger.warnPrefix;
+                    const infoPrefix = logger.infoPrefix;
+
+                    if (isWarn) hasWarns = true;
+
                     //subStep content 
-                    stepsString += `<div class="subStep">${getContentAsString(action)}</div>`;
+                    actionsHtml += `<div class="subStep ${isWarn ? 'warning' : ''} ${action.failed ? 'failed' : ''}">${getContentAsString(action.replace(warnPrefix, '').replace(infoPrefix, ''))}</div>`;
                 });
+
+                const stepTime = new Date(step.time);
+                const previousStepTime = i > 0 ? new Date(arr[i - 1].time) : new Date(this.time);
+                const stepDurationMs = stepTime - previousStepTime;
+
+                let stepDurationString = '';
+
+                if (stepDurationMs < 1000)
+                    stepDurationString = `${Math.round(stepDurationMs)}ms`;
+                else if (stepDurationMs < 60000)
+                    stepDurationString = `${(stepDurationMs / 1000).toFixed(1)}s`;
+                else {
+                    const minutes = Math.floor(stepDurationMs / 60000);
+                    const seconds = (stepDurationMs % 60000 / 1000).toFixed(1);
+
+                    stepDurationString = `${minutes}m ${seconds}s`;
+                }
+
+                const stepText = step.name ? getContentAsString(step.name) : 'No Name Step';
+
+                //stepName content 
+                stepsString += `
+                <div class="stepName ${hasWarns ? 'warning' : ''} ${step.failed ? 'failed' : ''}" title="${stepText}. Started at: ${stepTime.toLocaleTimeString()}">
+                <div class="stepTitle">${stepText}</div>
+                <span class="stepDuration">${stepDurationString}</span>
+                </div>`;
+
+                //add subSteps content 
+                stepsString += actionsHtml;
+
                 //close step tag
                 stepsString += '</div>';
             });
