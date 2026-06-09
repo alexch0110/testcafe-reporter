@@ -247,7 +247,7 @@ if (testsContent) {
 
 let concurencyBlockFile = 'node_modules/testcafe/lib/runner/browser-job.js';
 
-let concurencyContent = fs.readFileSync(concurencyBlockFile).toLocaleString();
+let concurencyContent;
 
 try {
     concurencyContent = fs.readFileSync(concurencyBlockFile).toLocaleString();
@@ -300,7 +300,7 @@ const failedTestReplaceWith = `errList.addError(err);
 
 let failedStepMarkFile = 'node_modules/testcafe/lib/api/wrap-test-function.js';
 
-let failedTestContent = fs.readFileSync(failedStepMarkFile).toLocaleString();
+let failedTestContent;
 
 try {
     failedTestContent = fs.readFileSync(failedStepMarkFile).toLocaleString();
