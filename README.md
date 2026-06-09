@@ -4,7 +4,7 @@
 
 ## About
 
-#### 2.0.11-2.2.3 versions works correctly only after execution "npx acd-html-reporter" (fixed in 2.3.0)
+#### 2.0.11-2.3.0 versions works correctly only after execution "npx acd-html-reporter" (fixed in 2.3.1)
 
 This is the **acd-html-reporter** reporter plugin for [TestCafe](http://devexpress.github.io/testcafe).
 
