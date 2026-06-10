@@ -319,40 +319,50 @@ module.exports = {
                 let hasWarns = false;
 
                 step.actions.forEach(actionObj => {
-                    const action = actionObj.message;
-                    const isWarn = action.startsWith('WARN');
-                    const logger = require('./Logger');
-                    const warnPrefix = logger.warnPrefix;
-                    const infoPrefix = logger.infoPrefix;
+                    const action = actionObj.message ?? actionObj;
 
-                    if (isWarn) hasWarns = true;
+                    if (action) {
+                        const isWarn = action.startsWith('WARN');
+                        const logger = require('./Logger');
+                        const warnPrefix = logger.warnPrefix;
+                        const infoPrefix = logger.infoPrefix;
 
-                    //subStep content 
-                    actionsHtml += `<div class="subStep ${isWarn ? 'warning' : ''} ${action.failed ? 'failed' : ''}">${getContentAsString(action.replace(warnPrefix, '').replace(infoPrefix, ''))}</div>`;
+                        if (isWarn) hasWarns = true;
+
+                        //subStep content 
+                        actionsHtml += `<div class="subStep ${isWarn ? 'warning' : ''} ${action.failed ? 'failed' : ''}">${getContentAsString(action.replace(warnPrefix, '').replace(infoPrefix, ''))}</div>`;
+                    }
                 });
 
-                const stepTime = new Date(step.time);
-                const previousStepTime = i > 0 ? new Date(arr[i - 1].time) : new Date(this.time);
-                const stepDurationMs = stepTime - previousStepTime;
+                let stepTime;
 
                 let stepDurationString = '';
 
-                if (stepDurationMs < 1000)
-                    stepDurationString = `${Math.round(stepDurationMs)}ms`;
-                else if (stepDurationMs < 60000)
-                    stepDurationString = `${(stepDurationMs / 1000).toFixed(1)}s`;
-                else {
-                    const minutes = Math.floor(stepDurationMs / 60000);
-                    const seconds = (stepDurationMs % 60000 / 1000).toFixed(1);
+                try {
+                    stepTime = new Date(step.time);
+                    const previousStepTime = i > 0 ? new Date(arr[i - 1].time) : new Date(this.time);
+                    const stepDurationMs = stepTime - previousStepTime;
 
-                    stepDurationString = `${minutes}m ${seconds}s`;
+                    if (stepDurationMs < 1000)
+                        stepDurationString = `${Math.round(stepDurationMs)}ms`;
+                    else if (stepDurationMs < 60000)
+                        stepDurationString = `${(stepDurationMs / 1000).toFixed(1)}s`;
+                    else {
+                        const minutes = Math.floor(stepDurationMs / 60000);
+                        const seconds = (stepDurationMs % 60000 / 1000).toFixed(1);
+
+                        stepDurationString = `${minutes}m ${seconds}s`;
+                    }
+                }
+                catch (err) {
+                    console.log(err.message);
                 }
 
                 const stepText = step.name ? getContentAsString(step.name) : 'No Name Step';
 
                 //stepName content 
                 stepsString += `
-                <div class="stepName ${hasWarns ? 'warning' : ''} ${step.failed ? 'failed' : ''}" title="${stepText}. Started at: ${stepTime.toLocaleTimeString()}">
+                <div class="stepName ${hasWarns ? 'warning' : ''} ${step.failed ? 'failed' : ''}" title="${stepText}. Started at: ${stepTime?.toLocaleTimeString()}">
                 <div class="stepTitle">${stepText}</div>
                 <span class="stepDuration">${stepDurationString}</span>
                 </div>`;

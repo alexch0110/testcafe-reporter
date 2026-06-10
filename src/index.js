@@ -419,22 +419,27 @@ module.exports = function () {
 
         markFailedStepAndAction (meta) {
             this.doForSteps(meta, steps => {
-                let isStepFailed = false;
+                try {
+                    let isStepFailed = false;
 
-                for (let i = steps.length - 1; i >= 0 && !isStepFailed; i--) {
-                    const step = steps[i];
+                    for (let i = steps.length - 1; i >= 0 && !isStepFailed; i--) {
+                        const step = steps[i];
 
-                    if (Date.parse(step.time) > meta.failTime) continue;
-                    step.failed = true;
-                    isStepFailed = true;
+                        if (Date.parse(step.time) > meta.failTime) continue;
+                        step.failed = true;
+                        isStepFailed = true;
 
-                    for (let j = step.actions.length - 1; j >= 0; j--) {
-                        const action = step.actions[j];
+                        for (let j = step.actions.length - 1; j >= 0; j--) {
+                            const action = step.actions[j];
 
-                        if (Date.parse(action.time) > meta.failTime) continue;
-                        action.failed = true;
-                        return;
+                            if (Date.parse(action.time) > meta.failTime) continue;
+                            action.failed = true;
+                            return;
+                        }
                     }
+                }
+                catch (err) {
+                    console.log(err.message);
                 }
             });
         },
