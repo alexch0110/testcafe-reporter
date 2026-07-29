@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-acd-html-reporter",
-  "version": "v2.3.4",
+  "version": "v2.3.5",
   "description": "HTML & Excel TestCafe reporter plugin",
   "repository": "https://github.com/alexch0110/testcafe-reporter",
   "author": {
@@ -36,14 +36,14 @@
     "@babel/eslint-parser": "^7.25.9",
     "@babel/plugin-transform-runtime": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
-    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/eslintrc": "^3.3.6",
     "@eslint/js": "^9.13.0",
     "callsite-record": "^3.2.0",
     "del": "^1.2.0",
     "globals": "^15.11.0",
     "gulp": "^4.0.0",
     "gulp-babel": "^8.0.0",
-    "gulp-eslint": "^5.0.0",
+    "gulp-eslint": "^6.0.0",
     "gulp-mocha": "^6.0.0",
     "normalize-newline": "^1.0.2",
     "publish-please": "^5.4.3",
@@ -56,7 +56,7 @@
     "chalk": "^3.0.0",
     "copy-dir": "^1.2.0",
     "exceljs": "^4.4.0",
-    "sharp": "^0.33.5"
+    "sharp": "^0.35.3"
   },
   "bin": {
     "acd-html-reporter": "bin/exec",
