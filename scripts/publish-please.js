@@ -30,7 +30,8 @@ function runCommand (command, args) {
         args,
         {
             cwd:   rootDir,
-            stdio: 'inherit'
+            stdio: 'inherit',
+            shell: false
         }
     );
 }
@@ -264,8 +265,13 @@ async function publish () {
 
     const result = runCommand('npm', ['publish']);
 
-    if (result.status !== 0)
-        fail('npm publish failed');
+    if (result.error) {
+        console.error(result.error);
+        fail(`Unable to start npm publish: ${result.error.message}`);
+    }
+
+    if (result.status !== 0) 
+        fail(`npm publish failed with exit code ${result.status}`);
 
     ok('Package published');
 }
