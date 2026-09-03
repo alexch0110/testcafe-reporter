@@ -26,12 +26,12 @@ function fail (message) {
 
 function runCommand (command, args) {
     return spawnSync(
-        process.platform === 'win32' ? `${command}.cmd` : command,
+        command,
         args,
         {
             cwd:   rootDir,
             stdio: 'inherit',
-            shell: false
+            shell: process.platform === 'win32'
         }
     );
 }
