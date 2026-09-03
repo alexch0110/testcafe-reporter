@@ -17,7 +17,6 @@
     "test": "gulp test",
     "publish-please": "node scripts/publish-please.js",
     "prepublishOnly": "node scripts/publish-please.js guard",
-    "publish": "publish",
     "postinstall": "node bin/create-config.js && node ./bin/exec",
     "mocha": "mocha test/test.js --ui bdd --reporter spec --timeout 20000"
   },
