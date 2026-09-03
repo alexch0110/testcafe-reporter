@@ -1,23 +1,32 @@
 var gulp    = require('gulp');
-var eslint  = require('gulp-eslint');
+var ESLint = require('eslint').ESLint;
 var babel   = require('gulp-babel');
-var mocha   = require('gulp-mocha');
+const { exec } = require('child_process');
 var del     = require('del');
 
 function clean (cb) {
     del('lib', cb);
 }
 
-function lint () {
-    return gulp
-        .src([
-            'src/**/*.js',
-            'test/**/*.js',
-            'Gulpfile.js'
-        ])
-        .pipe(eslint())
-        .pipe(eslint.format())
-        .pipe(eslint.failAfterError());
+async function lint () {
+    var eslint = new ESLint();
+
+    var results = await eslint.lintFiles([
+        'src/**/*.js',
+        'test/**/*.js',
+        'gulpfile.js'
+    ]);
+
+    var formatter = await eslint.loadFormatter('stylish');
+    var output = formatter.format(results);
+
+    if (output)
+        console.log(output);
+
+    if (results.some(function (result) {
+        return result.errorCount > 0;
+    }))
+        throw new Error('ESLint found errors');
 }
 
 function build () {
@@ -30,14 +39,14 @@ function build () {
         .pipe(gulp.dest('lib'));
 }
 
-function test () {
-    return gulp
-        .src('test/test.js')
-        .pipe(mocha({
-            ui:       'bdd',
-            reporter: 'spec',
-            timeout:  typeof v8debug === 'undefined' ? 20000 : Infinity // NOTE: disable timeouts in debug
-        }));
+function test (cb) {
+    exec(
+        'npm run test:mocha',
+        { stdio: 'inherit' },
+        function (err) {
+            cb(err);
+        }
+    );
 }
 
 function preview () {

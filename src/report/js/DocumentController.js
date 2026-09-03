@@ -1,5 +1,5 @@
 'use strict';
-/* eslint-disable no-undef, no-use-before-define, no-unused-expressions */
+/* eslint-disable no-undef, no-use-before-define */
 // Encapsulate the code to avoid global namespace pollution
 (() => {
     // Constants for frequently used selectors and classes

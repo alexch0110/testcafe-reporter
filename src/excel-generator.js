@@ -63,7 +63,6 @@ async function generateReport (report, outPath) {
     }
 
     // group by fixture+test
-    /* eslint-disable-next-line no-undef */
     const history = new Map();
 
     for (const fixture of report.fixtures || []) {

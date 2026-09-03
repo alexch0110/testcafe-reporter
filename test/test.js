@@ -3,6 +3,7 @@ var normalizeNewline = require('normalize-newline');
 var read             = require('read-file-relative').readSync;
 var createReport     = require('./utils/create-report');
 
+// eslint-disable-next-line no-undef
 it('Should produce report with colors', function () {
     var report   = createReport(true);
     var expected = JSON.parse(read('./data/report-with-colors.json'));
@@ -13,6 +14,7 @@ it('Should produce report with colors', function () {
     assert.strictEqual(report, expected);
 });
 
+// eslint-disable-next-line no-undef
 it('Should produce report without colors', function () {
     var report   = createReport(false);
     var expected = read('./data/report-without-colors');
