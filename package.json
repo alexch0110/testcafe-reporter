@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-acd-html-reporter",
-  "version": "v2.3.6",
+  "version": "v2.3.7",
   "description": "HTML & Excel TestCafe reporter plugin",
   "repository": "https://github.com/alexch0110/testcafe-reporter",
   "author": {
@@ -54,7 +54,7 @@
     "chalk": "^3.0.0",
     "copy-dir": "^1.2.0",
     "exceljs": "^4.4.0",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.4"
   },
   "bin": {
     "acd-html-reporter": "bin/exec",
