@@ -1,5 +1,33 @@
 let maxTestId = 0;
 
+let reportGenerationQueue = Promise.resolve();
+
+function enqueueReportGeneration (command, reporter, reportPath) {
+    reportGenerationQueue = reportGenerationQueue.then(() => new Promise(resolve => {
+        const child = require('child_process').spawn(command, {
+            shell: true,
+            stdio: 'inherit'
+        });
+
+        let settled = false;
+
+        const finish = message => {
+            if (settled) return;
+            settled = true;
+            if (message) console.log(message);
+            resolve();
+        };
+
+        child.once('error', err => finish(`reportTaskDone: ${err.message}`));
+        child.once('close', code => {
+            if (code === 0)
+                finish(reporter.chalk[reporter.chalkStyles.report](`Html report generated: ${require('path').resolve(reportPath)}`));
+            else
+                finish(`reportTaskDone: acd-html-combine exited with code ${code}`);
+        });
+    }));
+}
+
 module.exports = function () {
     return {
         noColors: false,
@@ -242,33 +270,43 @@ module.exports = function () {
                 }
                 else errName = 'Unknown error';
       
-                stackTrace.push([]);
-      
-                const filterArr = ['node:internal', 'node_modules', 'process._tickCallback', '__awaiter'];
-                const isMessageSuite = (msg) => filterArr.every(f => !msg.includes(f)) && msg.includes(':');
+                const lines = [errName];
+                const frames = new Set();
+                const visited = new Set();
 
-                stackTrace[index].push(errName);
+                const addFrame = value => {
+                    const text = String(value).trim();
+                    const normalized = text.replace(/\\/g, '/');
+                    const hasLocation = /\.(?:[cm]?[jt]sx?):\d+(?::\d+)?\)?$/.test(text);
+                    const isInternal = /(?:^|\/)node_modules\/|node:internal/.test(normalized);
 
-                if (errs[index].stack) {
-                    const stackArr = errs[index].stack.split('\n').slice(1);
+                    if (hasLocation && !isInternal) frames.add(text);
+                };
 
-                    for (const stackStr of stackArr) 
-                        if (isMessageSuite(stackStr)) stackTrace[index].push(stackStr);
-          
-                }
-                else if (errs[index].callsite) {
-                    errs[index].callsite.stackFrames.forEach(stackFrame => {
-                        const msg = stackFrame.toString();
+                const collect = error => {
+                    if (!error || typeof error !== 'object' || visited.has(error)) return;
+                    visited.add(error);
 
-                        if (isMessageSuite(msg)) stackTrace[index].push(msg);
-                    });
-      
-                    const errorFile = errs[index].callsite.filename + ':' + (errs[index].callsite.lineNum + 1);
+                    for (const line of String(error.stack || '').split(/\r?\n/))
+                        addFrame(line);
 
-                    if (!stackTrace[index][1].includes(errorFile)) stackTrace[index].splice(1, 0, errorFile);
-      
-                }
-                else stackTrace[index].push(...errName.split('\n'));
+                    const callsite = error.callsite;
+
+                    for (const frame of callsite?.stackFrames || [])
+                        addFrame(frame.toString());
+
+                    if (callsite?.filename && Number.isInteger(callsite.lineNum))
+                        addFrame(`${callsite.filename}:${callsite.lineNum + 1}`);
+
+                    collect(error.originError);
+                    if (error.cause) {
+                        lines.push(`Caused by: ${error.cause.message || String(error.cause)}`);
+                        collect(error.cause);
+                    }
+                };
+
+                collect(err);
+                stackTrace.push([...lines, ...frames]);
             }
       
             return stackTrace;
@@ -535,7 +573,6 @@ module.exports = function () {
                 const time = this.moment(endTime).format('M/DD/YYYY HH:mm:ss');
                 const durationMs = endTime - this.taskStartTime;
                 const durationStr = this.moment.duration(durationMs).format('h[h] mm[m] ss[s]');
-                const path = require('path');
                 const reportPath = `${this.reportUtil.getReportPath()}/${this.reportUtil.singleHtmlFileName}`;
 
                 passed -= this.brokenCount;
@@ -558,8 +595,7 @@ module.exports = function () {
                 console.log(`Duration: ${durationStr}`);
                 console.log(`Run results: ${summary}`);
                 if (this.logWarnings && warnings.length) console.log(warnings);
-                require('child_process').execSync(`npx acd-html-combine ${this.reportUtil.testResultsPath} --dest ${reportPath} --last ${this.getResultFileName()} ${this.appendLogs ? '' : '--single'}`, { stdio: 'inherit' });
-                console.log(this.chalk[this.chalkStyles.report](`Html report generated: ${path.resolve(reportPath)}`));
+                enqueueReportGeneration(`npx acd-html-combine ${this.reportUtil.testResultsPath} --dest ${reportPath} --last ${this.getResultFileName()} ${this.appendLogs ? '' : '--single'}`, this, reportPath);
             }
             catch (err) {
                 console.log('reportTaskDone: ' + (err.message ? err.message : err.msg));

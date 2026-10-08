@@ -11,6 +11,9 @@ const single = args.single;
 const disableExcel = args.disableExcel ? args.disableExcel : config.excel.disable;
 const daysToShow = args.days ?? config.html.days;
 const keepFullLogsCount = args.keepFullCount ?? config.html.keepFullCount;
+const oldestTestDate = new Date();
+
+oldestTestDate.setDate(oldestTestDate.getDate() - +daysToShow);
 
 let files = [];
 
@@ -102,6 +105,8 @@ function processFixtures (fixtures) {
 function getFormattedJson () {
     const json = { startTime: new Date('1999/01/01').toString(), fixtures: [] };
 
+    let maxTestId = 0;
+
     for (const file of files) {
         let content;
 
@@ -114,20 +119,26 @@ function getFormattedJson () {
 
         if (new Date(content.startTime) > new Date(json.startTime)) 
             json.startTime = content.startTime;
-        
-        const testIds = json.fixtures.map(fixture => fixture.tests.map(test => test.id)).flat();
-        
-        let maxTestId = testIds.reduce((max, id) => id ? Math.max(max, id) : 0, 0);
+
+        let nextTestId = maxTestId;
+
+        let maxTestIdInResults = maxTestId;
         
         for (const fixture of content.fixtures) {
             //eslint-disable-next-line no-loop-func
             fixture.tests.forEach((test) => {
-                if (typeof test.id === 'undefined') test.id = maxTestId++;
+                if (typeof test.id === 'undefined') test.id = nextTestId++;
                 else {
-                    test.id += maxTestId++;
-                    maxTestId = test.id;
+                    test.id += nextTestId++;
+                    nextTestId = test.id;
                 }
+                if (test.id) maxTestIdInResults = Math.max(maxTestIdInResults, test.id);
             });
+
+            fixture.tests = fixture.tests.filter(test => new Date(test.time) >= oldestTestDate);
+
+            if (!fixture.tests.length) continue;
+
             const theSameFix = json.fixtures.find(fix => fix.name === fixture.name);
 
             if (theSameFix) 
@@ -135,12 +146,12 @@ function getFormattedJson () {
             else 
                 json.fixtures.push(fixture);
         }
+
+        maxTestId = maxTestIdInResults;
     }
 
-    for (const fixture of json.fixtures) {
-        fixture.tests = fixture.tests.filter(t => new Date(t.time) >= new Date().setDate(new Date().getDate() - +daysToShow));
+    for (const fixture of json.fixtures)
         fixture.tests.sort((t1, t2) => new Date(t1.time) - new Date(t2.time));
-    }
     
     json.fixtures = json.fixtures.filter(f => f.tests.length);
     json.fixtures = processFixtures(json.fixtures);

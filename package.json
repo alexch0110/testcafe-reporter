@@ -1,6 +1,6 @@
 {
   "name": "testcafe-reporter-acd-html-reporter",
-  "version": "v2.3.7",
+  "version": "v2.3.8",
   "description": "HTML & Excel TestCafe reporter plugin",
   "repository": "https://github.com/alexch0110/testcafe-reporter",
   "author": {
@@ -61,5 +61,10 @@
     "acd-html-combine": "bin/combine",
     "acd-html-config": "bin/config"
   },
-  "type": "commonjs"
+  "type": "commonjs",
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
+  }
 }

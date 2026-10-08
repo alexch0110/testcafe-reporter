@@ -1,4 +1,3 @@
-var stepsArray = [];
 const fs = require('fs');
 
 // var ad = {
@@ -162,6 +161,7 @@ module.exports = {
     getJsonAsHtml: function (json) {
         //open fixtures tag
         let generatedReport = '<div class="fixtures">';
+        const stepsArray = [];
 
         json.fixtures.forEach(fixture => {
             //open fixture tag
@@ -170,8 +170,24 @@ module.exports = {
             generatedReport += `<div class="fixtureName">${fixture.name}<div class="summary"></div></div>`;
             //open tests tag
             generatedReport += '<div class="tests">';
+            const latestTestTimes = new Map();
+
             fixture.tests.forEach(test => {
-                const isLastTestRun = !fixture.tests.find(another => test.name === another.name && new Date(another[this.jsonNames.testTime]) > new Date(test[this.jsonNames.testTime]));
+                const testTime = new Date(test[this.jsonNames.testTime]).getTime();
+
+                if (!Number.isFinite(testTime)) return;
+
+                const latestTestTime = latestTestTimes.get(test.name);
+
+                // eslint-disable-next-line no-undefined
+                if (latestTestTime === undefined || testTime > latestTestTime)
+                    latestTestTimes.set(test.name, testTime);
+            });
+
+            fixture.tests.forEach(test => {
+                const testTime = new Date(test[this.jsonNames.testTime]).getTime();
+                const latestTestTime = latestTestTimes.get(test.name);
+                const isLastTestRun = !Number.isFinite(testTime) || latestTestTime <= testTime;
                 
                 //test content
                 if (test[this.jsonNames.testTime] && isLastTestRun) generatedReport += `<div id="${test.id}" class="test" status="${test.status}">${test.name}<div class="tag"></div><div class="shortInfo"><span>❗</span><img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><text x='-2' y='15'>🖼️</text></svg>"/><input type="text"/></div></div>`;
