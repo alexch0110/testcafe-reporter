@@ -26,6 +26,8 @@ function enqueueReportGeneration (command, reporter, reportPath) {
                 finish(`reportTaskDone: acd-html-combine exited with code ${code}`);
         });
     }));
+
+    return reportGenerationQueue;
 }
 
 module.exports = function () {
@@ -568,7 +570,7 @@ module.exports = function () {
             }
         },
 
-        reportTaskDone (endTime, passed, warnings) {
+        async reportTaskDone (endTime, passed, warnings) {
             try {
                 const time = this.moment(endTime).format('M/DD/YYYY HH:mm:ss');
                 const durationMs = endTime - this.taskStartTime;
@@ -595,7 +597,7 @@ module.exports = function () {
                 console.log(`Duration: ${durationStr}`);
                 console.log(`Run results: ${summary}`);
                 if (this.logWarnings && warnings.length) console.log(warnings);
-                enqueueReportGeneration(`npx acd-html-combine ${this.reportUtil.testResultsPath} --dest ${reportPath} --last ${this.getResultFileName()} ${this.appendLogs ? '' : '--single'}`, this, reportPath);
+                await enqueueReportGeneration(`npx acd-html-combine ${this.reportUtil.testResultsPath} --dest ${reportPath} --last ${this.getResultFileName()} ${this.appendLogs ? '' : '--single'}`, this, reportPath);
             }
             catch (err) {
                 console.log('reportTaskDone: ' + (err.message ? err.message : err.msg));
